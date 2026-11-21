@@ -1,0 +1,73 @@
+@startuml
+title Módulo de Triaje y Dispensación - Centro de Salud Paiján
+
+class Persona {
+  # dni: String
+  # nombreCompleto: String
+  + getDniEnmascarado(): String
+  + getNombreCompleto(): String
+  + obtenerRol(): String
+}
+
+class Paciente {
+  - nroHistoria: String
+  - alergias: String
+  + getNroHistoria(): String
+  + obtenerRol(): String
+}
+
+class PersonalSalud {
+  - colegiatura: String
+  - especialidad: String
+  + getColegiatura(): String
+  + obtenerRol(): String
+}
+
+class CentroSalud {
+  - nombre: String
+  - distrito: String
+  - personal: List<PersonalSalud>
+  + agregarPersonal(p: PersonalSalud): void
+  + getPersonal(): List<PersonalSalud>
+}
+
+class FichaAtencion {
+  - codigo: String
+  - paciente: Paciente
+  - responsable: PersonalSalud
+  - pesoKg: double
+  - tallaM: double
+  - temperaturaC: double
+  - medicamentos: List<ItemMedicamento>
+  + registrarTriaje(peso: double, talla: double, temp: double): void
+  + agregarMedicamento(nombre: String, cantidad: int): void
+  + totalUnidadesDispensadas(): int
+}
+
+class ItemMedicamento {
+  - nombre: String
+  - cantidad: int
+  + getNombre(): String
+  + getCantidad(): int
+  + detalle(): String
+}
+
+class GestorCentroSalud <<Singleton>> {
+  - instancia: GestorCentroSalud {static}
+  - pacientes: List<Paciente>
+  - fichas: List<FichaAtencion>
+  + filtrarFichasConFiebre(): List<FichaAtencion>
+  + generarReporteAnonimizado(): Tuple<String>
+  + contarTotalMedicamentos(): int
+}
+
+Persona <|-- Paciente
+Persona <|-- PersonalSalud
+CentroSalud "1" o-- "*" PersonalSalud : agrega
+FichaAtencion "*" --> "1" Paciente : atiende a
+FichaAtencion "*" --> "1" PersonalSalud : atendido por
+FichaAtencion "1" *-- "1..*" ItemMedicamento : compone
+GestorCentroSalud "1" --> "*" Paciente : administra
+GestorCentroSalud "1" --> "*" FichaAtencion : gestiona
+@enduml
+
